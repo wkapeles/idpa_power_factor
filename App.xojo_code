@@ -7,82 +7,24 @@ Inherits Application
 		  
 		  Dim dbFile As FolderItem
 		  Dim db As New SQLiteDatabase
-		  dbFile = GetFolderItem("reference_data.sqlite")
+		  dbFile = GetFolderItem("shooter_data.sqlite")
 		  db.DatabaseFile = dbFile
 		  If db.Connect Then
 		    powerFactor_main.Show
 		    Return
 		  Else 
 		    Dim f As FolderItem
-		    f = New FolderItem("reference_data.sqlite")
+		    f = New FolderItem("shooter_data.sqlite")
 		    
 		    Dim dbase As New SQLiteDatabase
 		    dbase.DatabaseFile = f
 		    If dbase.CreateDatabaseFile Then
-		      dbase.SQLExecute("CREATE TABLE reference ( id_reference INTEGER PRIMARY KEY, division TEXT , bullet_weight INTEGER, fps INTEGER);")
+		      dbase.SQLExecute("CREATE TABLE results ( id_reference INTEGER PRIMARY KEY, last_name TEXT, first_name TEXT, idpa_number TEXT, division TEXT , bullet_weight INTEGER, test1 INTEGER, test2 INTEGER, test3 INTEGER , pass TEXT );")
 		    Else
 		      MsgBox("Database not created. Error: " + dbase.ErrorMessage)
 		    End If
 		  End If
 		  
-		  
-		  //// populate reference database with source data
-		  //Dim divisions New Xojo.Core.Dictionary
-		  //divisions.Value("division") = "CDP"
-		  //divisions.Value("division") = "ESP"
-		  //divisions.Value("division") = "SSP"
-		  //divisions.Value("division") = "CCP"
-		  //divisions.Value("division") = "REV"
-		  //divisions.Value("division") = "BUG"
-		  //divisions.Value("division") = "PCC"
-		  
-		  //Dim r As FolderItem
-		  //Dim dbr As New SQLiteDatabase
-		  //dbrFile = GetFolderItem("reference_data.sqlite")
-		  //dbr.DatabaseFile = dbrFile
-		  //If dbr.Connect Then
-		  //Dim fps As Variant
-		  //Dim pf As Integer
-		  //
-		  //For Each division As Xojo.Core.DictionaryEntry In divisions
-		  //For i As Integer = 89 To 300
-		  
-		  //// determine if weight bullet qualifies for division by calculating FPS to meet power factor
-		  //Dim Floor As Integer
-		  //If division = "CDP Then
-		  //Floor = 165
-		  //Elseif division = "ESP" Then
-		  //Floor = 125
-		  //Elseif division = "SSP" Then
-		  //Floor = 125
-		  //Elseif division = "CCP" Then
-		  //Floor = 125
-		  //Elseif division = "BUG" Then
-		  //Floor = 95
-		  //Elseif division = "PCC" Then
-		  //Floor = 125
-		  //Elseif division = "REV" Then
-		  //Floor = 105
-		  //End If
-		  //
-		  //
-		  //If db.Connect Then
-		  //db.SQLExecute("BEGIN TRANSACTION;")
-		  //db.SQLExecute ("INSERT INTO reference (division, bullet_weight, fps ) VALUES " + "( "+ division +","+ i +","+  fps +");")
-		  //If db.Error Then
-		  //MsgBox("Error: " + db.ErrorMessage)
-		  //db.Rollback
-		  //Else
-		  //db.Commit
-		  //End If
-		  //
-		  //
-		  //
-		  //Next
-		  //Next
-		  //
-		  //
-		  //
 		  
 		End Sub
 	#tag EndEvent
@@ -103,5 +45,7 @@ Inherits Application
 	#tag EndConstant
 
 
+	#tag ViewBehavior
+	#tag EndViewBehavior
 End Class
 #tag EndClass
