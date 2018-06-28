@@ -399,7 +399,7 @@ Begin Window powerFactor_main
       LockTop         =   True
       Mask            =   ""
       Password        =   False
-      ReadOnly        =   True
+      ReadOnly        =   False
       Scope           =   2
       TabIndex        =   1
       TabPanelIndex   =   0
@@ -587,9 +587,9 @@ Begin Window powerFactor_main
       AutoHideScrollbars=   True
       Bold            =   False
       Border          =   True
-      ColumnCount     =   1
+      ColumnCount     =   10
       ColumnsResizable=   False
-      ColumnWidths    =   ""
+      ColumnWidths    =   "15%, 15%, *"
       DataField       =   ""
       DataSource      =   ""
       DefaultRowHeight=   -1
@@ -598,14 +598,14 @@ Begin Window powerFactor_main
       EnableDragReorder=   False
       GridLinesHorizontal=   0
       GridLinesVertical=   0
-      HasHeading      =   False
+      HasHeading      =   True
       HeadingIndex    =   -1
       Height          =   164
       HelpTag         =   ""
       Hierarchical    =   False
       Index           =   -2147483648
       InitialParent   =   ""
-      InitialValue    =   ""
+      InitialValue    =   "Last	First	IDPA#	Div	Class	Wt	1	2	3	P/F"
       Italic          =   False
       Left            =   20
       LockBottom      =   False
@@ -727,7 +727,7 @@ Begin Window powerFactor_main
       LockTop         =   True
       Mask            =   ""
       Password        =   False
-      ReadOnly        =   True
+      ReadOnly        =   False
       Scope           =   2
       TabIndex        =   21
       TabPanelIndex   =   0
@@ -770,7 +770,7 @@ Begin Window powerFactor_main
       LockTop         =   True
       Mask            =   ""
       Password        =   False
-      ReadOnly        =   True
+      ReadOnly        =   False
       Scope           =   2
       TabIndex        =   22
       TabPanelIndex   =   0
@@ -780,12 +780,47 @@ Begin Window powerFactor_main
       TextFont        =   "System"
       TextSize        =   0.0
       TextUnit        =   0
-      Top             =   44
+      Top             =   45
       Transparent     =   False
       Underline       =   False
       UseFocusRing    =   False
       Visible         =   True
       Width           =   133
+   End
+   Begin Label Label8
+      AutoDeactivate  =   True
+      Bold            =   False
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      Height          =   20
+      HelpTag         =   ""
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   12
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   2
+      Selectable      =   False
+      TabIndex        =   23
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "IDPA Number"
+      TextAlign       =   2
+      TextColor       =   &c00000000
+      TextFont        =   "System"
+      TextSize        =   0.0
+      TextUnit        =   0
+      Top             =   45
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   100
    End
 End
 #tag EndWindow
@@ -798,8 +833,17 @@ End
 		  dbFile = GetFolderItem("shooter_data.sqlite")
 		  db.DatabaseFile = dbFile
 		  If db.Connect Then
-		    Dim sql As String = "INSERT INTO results (last_name, first_name, idpa_number, division, bullet_weight, test1, test2, test3, pass) VALUES (lastName, firstName, idpa_number, division, bulletWeight, test1, test2, test3, pass);"
+		    db.SQLExecute("BEGIN TRANSACTION")
+		    Dim sql As String = "INSERT INTO results (last_name, first_name, idpa_number, division, bullet_weight, test1, test2, test3, pass) VALUES ('"+ lastName+"','"+ firstName +"','"+ idpa_number +"','"+ division +"','"+ bulletWeight.ToText +"','"+ test1.ToText +"','"+ test2.ToText +"','"+ test3.ToText +"','"+ pass +"');"
 		    db.SQLExecute(sql)
+		    If db.Error Then
+		      MsgBox("Error: " + db.ErrorMessage)
+		      db.Rollback
+		    Else
+		      db.Commit
+		    End If
+		    
+		    refreshLB
 		  Else
 		    MsgBox ("Error connecting to database.")
 		  End If
@@ -858,7 +902,12 @@ End
 		    End If
 		    
 		    If rs.RecordCount > 0 Then
-		      
+		      listbox1.DeleteAllRows
+		      While Not rs.EOF
+		        Listbox1.AddRow(rs.IdxField(1).StringValue, rs.IdxField(2).StringValue, _
+		        rs.IdxField(3).StringValue, rs.IdxField(4).StringValue, rs.IdxField(5).StringValue, rs.IdxField(6).StringValue, rs.IdxField(7).StringValue,rs.IdxField(8).StringValue,rs.IdxField(9).StringValue,rs.IdxField(10).StringValue)
+		        rs.MoveNext
+		      Wend
 		      
 		    Else
 		      Return
@@ -887,9 +936,11 @@ End
 		    If t  = True Then
 		      pass = "Pass"
 		      addRecord ( lastName.Text.ToText , firstName.Text.ToText , idpaNumber.Text.ToText, divisionPU.Text.ToText, Integer.FromText(grainsPU.Text.ToText), Integer.FromText(test1Text.Text.ToText), Integer.FromText(test2Text.Text.ToText), Integer.FromText(test3Text.Text.ToText), pass)
+		      refreshLB
 		    Else
 		      pass = "Fail"
 		      addRecord ( lastName.Text.ToText , firstName.Text.ToText , idpaNumber.Text.ToText, divisionPU.Text.ToText, Integer.FromText(grainsPU.Text.ToText), Integer.FromText(test1Text.Text.ToText), Integer.FromText(test2Text.Text.ToText), Integer.FromText(test3Text.Text.ToText), pass)
+		      refreshLB
 		    End If
 		  End If
 		  
@@ -920,9 +971,11 @@ End
 		    If t  = True Then
 		      pass = "Pass"
 		      addRecord ( lastName.Text.ToText , firstName.Text.ToText , idpaNumber.Text.ToText, divisionPU.Text.ToText, Integer.FromText(grainsPU.Text.ToText), Integer.FromText(test1Text.Text.ToText), Integer.FromText(test2Text.Text.ToText), Integer.FromText(test3Text.Text.ToText), pass)
+		      refreshLB
 		    Else
 		      pass = "Fail"
 		      addRecord ( lastName.Text.ToText , firstName.Text.ToText , idpaNumber.Text.ToText, divisionPU.Text.ToText, Integer.FromText(grainsPU.Text.ToText), Integer.FromText(test1Text.Text.ToText), Integer.FromText(test2Text.Text.ToText), Integer.FromText(test3Text.Text.ToText), pass)
+		      refreshLB
 		    End If
 		  End If
 		  
@@ -953,9 +1006,11 @@ End
 		    If t  = True Then
 		      pass = "Pass"
 		      addRecord ( lastName.Text.ToText , firstName.Text.ToText , idpaNumber.Text.ToText, divisionPU.Text.ToText, Integer.FromText(grainsPU.Text.ToText), Integer.FromText(test1Text.Text.ToText), Integer.FromText(test2Text.Text.ToText), Integer.FromText(test3Text.Text.ToText), pass)
+		      refreshLB
 		    Else
 		      pass = "Fail"
 		      addRecord ( lastName.Text.ToText , firstName.Text.ToText , idpaNumber.Text.ToText, divisionPU.Text.ToText, Integer.FromText(grainsPU.Text.ToText), Integer.FromText(test1Text.Text.ToText), Integer.FromText(test2Text.Text.ToText), Integer.FromText(test3Text.Text.ToText), pass)
+		      refreshLB
 		    End If
 		  End If
 		  
