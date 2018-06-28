@@ -587,7 +587,7 @@ Begin Window powerFactor_main
       AutoHideScrollbars=   True
       Bold            =   False
       Border          =   True
-      ColumnCount     =   10
+      ColumnCount     =   9
       ColumnsResizable=   False
       ColumnWidths    =   "15%, 15%, *"
       DataField       =   ""
@@ -605,7 +605,7 @@ Begin Window powerFactor_main
       Hierarchical    =   False
       Index           =   -2147483648
       InitialParent   =   ""
-      InitialValue    =   "Last	First	IDPA#	Div	Class	Wt	1	2	3	P/F"
+      InitialValue    =   "Last	First	IDPA#	Div	Wt	1	2	3	P/F	"
       Italic          =   False
       Left            =   20
       LockBottom      =   False
@@ -843,10 +843,27 @@ End
 		      db.Commit
 		    End If
 		    
-		    refreshLB
+		    Self.refreshLB
+		    Self.clearFields
+		    
 		  Else
 		    MsgBox ("Error connecting to database.")
 		  End If
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub clearFields()
+		  divisionPU.ListIndex = -1
+		  firstName.Text = ""
+		  grainsPU.ListIndex = -1
+		  idpaNumber.Text = ""
+		  lastName.Text = ""
+		  requiredField.Text = ""
+		  test1Text.Text = ""
+		  test2Text.Text = ""
+		  test3Text.Text = ""
 		  
 		End Sub
 	#tag EndMethod
@@ -894,7 +911,7 @@ End
 		  If db.Connect Then
 		    // Check for database records.  If none, dialog notifiying user of new test instance
 		    Dim rs As RecordSet
-		    rs = db.SQLSelect("SELECT last_name, first_name, idpa_number, division, class, bullet_weight, test1, test2, test3 , pass  FROM results ORDER BY last_name ASC;")
+		    rs = db.SQLSelect("SELECT last_name, first_name, idpa_number, division, bullet_weight, test1, test2, test3 , pass  FROM results ORDER BY last_name;")
 		    
 		    If db.Error Then
 		      MsgBox("Error: " + db.ErrorMessage)
@@ -905,7 +922,7 @@ End
 		      listbox1.DeleteAllRows
 		      While Not rs.EOF
 		        Listbox1.AddRow(rs.IdxField(1).StringValue, rs.IdxField(2).StringValue, _
-		        rs.IdxField(3).StringValue, rs.IdxField(4).StringValue, rs.IdxField(5).StringValue, rs.IdxField(6).StringValue, rs.IdxField(7).StringValue,rs.IdxField(8).StringValue,rs.IdxField(9).StringValue,rs.IdxField(10).StringValue)
+		        rs.IdxField(3).StringValue, rs.IdxField(4).StringValue, rs.IdxField(5).StringValue, rs.IdxField(6).StringValue, rs.IdxField(7).StringValue,rs.IdxField(8).StringValue,rs.IdxField(9).StringValue)
 		        rs.MoveNext
 		      Wend
 		      
@@ -1111,6 +1128,7 @@ End
 		      
 		    Else
 		      MsgBox ("New test started.  You may test shooters now.")
+		      self.refreshLB
 		      Return
 		    End If
 		    
