@@ -1,5 +1,5 @@
 #tag Window
-Begin Window confirmationWindow
+Begin Window EndconfirmationWindow
    BackColor       =   &cFFFFFF00
    Backdrop        =   0
    CloseButton     =   False
@@ -26,12 +26,12 @@ Begin Window confirmationWindow
    Title           =   "Confirm Database Reset"
    Visible         =   True
    Width           =   600
-   Begin PushButton deleteButton
+   Begin PushButton endButton
       AutoDeactivate  =   True
       Bold            =   False
       ButtonStyle     =   "0"
       Cancel          =   False
-      Caption         =   "DELETE RECORDS"
+      Caption         =   "END"
       Default         =   False
       Enabled         =   True
       Height          =   20
@@ -148,7 +148,7 @@ Begin Window confirmationWindow
       TabIndex        =   3
       TabPanelIndex   =   0
       TabStop         =   True
-      Text            =   "You have indicated your desire to delete all existing records in the database and restart a testing session.  This action is destructive and cannot be undone.  If you click ""DELETE RECORDS"" below, all records will be instantly deleted.  This cannot be undone.  If you do not want to delete all records, click ""CANCEL"" instead.  If you have any doubt about this, do not click ""DELETE RECORDS."" \n\nIf you choose to delete all records, there are no additional confirmation screens.  Deletion of all records will happen immediately."
+      Text            =   "Click END to end this test run and export all data to the desktop.  This action, once commenced, cannot be aborted.  Click cancel to return to test mode."
       TextAlign       =   0
       TextColor       =   &c00000000
       TextFont        =   "System"
@@ -160,34 +160,148 @@ Begin Window confirmationWindow
       Visible         =   True
       Width           =   560
    End
+   Begin Listbox lstTemp
+      AutoDeactivate  =   True
+      AutoHideScrollbars=   True
+      Bold            =   False
+      Border          =   True
+      ColumnCount     =   9
+      ColumnsResizable=   False
+      ColumnWidths    =   ""
+      DataField       =   ""
+      DataSource      =   ""
+      DefaultRowHeight=   -1
+      Enabled         =   True
+      EnableDrag      =   False
+      EnableDragReorder=   False
+      GridLinesHorizontal=   0
+      GridLinesVertical=   0
+      HasHeading      =   False
+      HeadingIndex    =   -1
+      Height          =   200
+      HelpTag         =   ""
+      Hierarchical    =   False
+      Index           =   -2147483648
+      InitialParent   =   ""
+      InitialValue    =   ""
+      Italic          =   False
+      Left            =   129
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      RequiresSelection=   False
+      Scope           =   0
+      ScrollbarHorizontal=   False
+      ScrollBarVertical=   True
+      SelectionType   =   0
+      ShowDropIndicator=   False
+      TabIndex        =   4
+      TabPanelIndex   =   0
+      TabStop         =   True
+      TextFont        =   "System"
+      TextSize        =   0.0
+      TextUnit        =   0
+      Top             =   51
+      Transparent     =   False
+      Underline       =   False
+      UseFocusRing    =   True
+      Visible         =   False
+      Width           =   300
+      _ScrollOffset   =   0
+      _ScrollWidth    =   -1
+   End
 End
 #tag EndWindow
 
 #tag WindowCode
 #tag EndWindowCode
 
-#tag Events deleteButton
+#tag Events endButton
 	#tag Event
 		Sub Action()
+		  
+		  
 		  Dim dbFile As FolderItem
 		  Dim db As New SQLiteDatabase
 		  dbFile = GetFolderItem("shooter_data.sqlite")
 		  db.DatabaseFile = dbFile
 		  If db.Connect Then
-		    Dim sql As String
-		    sql = "DROP TABLE  results;"
-		    db.SQLExecute(sql)
+		    // Check for database records.  If none, dialog notifiying user of new test instance
+		    Dim rs As RecordSet
+		    rs = db.SQLSelect("SELECT last_name, first_name, idpa_number, division, bullet_weight, test1, test2, test3 , pass  FROM results ORDER BY last_name;")
+		    
 		    If db.Error Then
-		      MsgBox("DB Error: " + db.ErrorMessage)
+		      MsgBox("Error: " + db.ErrorMessage)
+		      Return
+		    End If
+		    
+		    If rs.RecordCount > 0 Then
+		      lstTemp.Visible = True
+		      lstTemp.DeleteAllRows
+		      While Not rs.EOF
+		        lstTemp.AddRow(rs.IdxField(1).StringValue, rs.IdxField(2).StringValue, _
+		        rs.IdxField(3).StringValue, rs.IdxField(4).StringValue, rs.IdxField(5).StringValue, rs.IdxField(6).StringValue, rs.IdxField(7).StringValue,rs.IdxField(8).StringValue,rs.IdxField(9).StringValue)
+		        rs.MoveNext
+		      Wend
+		      
+		      
+		      Dim f As FolderItem
+		      Dim t As TextOutputStream
+		      Dim intRow, intColumn As Integer = 0
+		      f = GetSaveFolderItem( "TXT" , Str("results.txt"))
+		      If f = Nil Then 
+		        Return
+		      Else
+		        t = f.CreateTextFile
+		        For intRow = 0 To lstTemp.ListCount-1
+		          For intColumn = 0 To lstTemp.ColumnCount-1
+		            t.Write ConvertEncoding(lstTemp.Cell(intRow,intColumn),Encodings.SystemDefault)
+		            t.Write Chr(9)
+		          Next
+		          t.Write EndOfLine
+		        Next
+		      End If
+		      t.Close
+		      lstTemp.Visible = False
 		    Else
-		      db.SQLExecute("CREATE TABLE results ( id_reference INTEGER PRIMARY KEY, last_name TEXT, first_name TEXT, idpa_number TEXT, division TEXT ,  bullet_weight INTEGER, test1 INTEGER, test2 INTEGER, test3 INTEGER , pass TEXT );")
-		      MsgBox("All records deleted.  You may begin a new testing sequence.")
-		      Self.Close
-		      powerFactor_main.Close
-		      powerFactor_main.Show
-		      powerFactor_main.refreshLB
+		      Return
+		    End If
+		    
+		    Dim dbAFile As FolderItem
+		    Dim dbA As New SQLiteDatabase
+		    dbAFile = GetFolderItem("shooter_data.sqlite")
+		    dbA.DatabaseFile = dbFile
+		    If dbA.Connect Then
+		      
+		      Dim rsA As RecordSet
+		      rs = dbA.SQLSelect("SELECT * FROM results;")
+		      
+		      If dbA.Error Then
+		        MsgBox("Error: " + db.ErrorMessage)
+		        Return
+		      End If
+		      
+		      If rs.RecordCount > 0 Then
+		        // confirm desire to delete * and restart testing
+		        Self.close
+		        confirmationWindow.Show
+		        Return
+		      End If
 		    End If
 		  End If
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
 		  
 		  
 		End Sub

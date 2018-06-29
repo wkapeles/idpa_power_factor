@@ -54,7 +54,7 @@ Begin Window powerFactor_main
       Password        =   False
       ReadOnly        =   True
       Scope           =   2
-      TabIndex        =   1
+      TabIndex        =   6
       TabPanelIndex   =   0
       TabStop         =   True
       Text            =   ""
@@ -97,7 +97,7 @@ Begin Window powerFactor_main
       Password        =   False
       ReadOnly        =   False
       Scope           =   2
-      TabIndex        =   2
+      TabIndex        =   7
       TabPanelIndex   =   0
       TabStop         =   True
       Text            =   ""
@@ -140,7 +140,7 @@ Begin Window powerFactor_main
       Password        =   False
       ReadOnly        =   False
       Scope           =   2
-      TabIndex        =   3
+      TabIndex        =   8
       TabPanelIndex   =   0
       TabStop         =   True
       Text            =   ""
@@ -183,7 +183,7 @@ Begin Window powerFactor_main
       Password        =   False
       ReadOnly        =   False
       Scope           =   2
-      TabIndex        =   4
+      TabIndex        =   9
       TabPanelIndex   =   0
       TabStop         =   True
       Text            =   ""
@@ -436,7 +436,7 @@ Begin Window powerFactor_main
       LockRight       =   False
       LockTop         =   True
       Scope           =   2
-      TabIndex        =   12
+      TabIndex        =   4
       TabPanelIndex   =   0
       TabStop         =   True
       TextFont        =   "System"
@@ -654,7 +654,7 @@ Begin Window powerFactor_main
       LockRight       =   False
       LockTop         =   True
       Scope           =   2
-      TabIndex        =   19
+      TabIndex        =   5
       TabPanelIndex   =   0
       TabStop         =   True
       TextFont        =   "System"
@@ -729,7 +729,7 @@ Begin Window powerFactor_main
       Password        =   False
       ReadOnly        =   False
       Scope           =   2
-      TabIndex        =   21
+      TabIndex        =   2
       TabPanelIndex   =   0
       TabStop         =   True
       Text            =   ""
@@ -772,7 +772,7 @@ Begin Window powerFactor_main
       Password        =   False
       ReadOnly        =   False
       Scope           =   2
-      TabIndex        =   22
+      TabIndex        =   3
       TabPanelIndex   =   0
       TabStop         =   True
       Text            =   ""
@@ -901,8 +901,8 @@ End
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Sub refreshLB()
+	#tag Method, Flags = &h0
+		Sub refreshLB()
 		  
 		  Dim dbFile As FolderItem
 		  Dim db As New SQLiteDatabase
@@ -1147,7 +1147,8 @@ End
 	#tag Event
 		Sub Action()
 		  // confirm desire to end test and export file
-		  
+		  Dim d As New EndconfirmationWindow
+		  d.show
 		End Sub
 	#tag EndEvent
 #tag EndEvents
